@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+        "http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+
+    <package name="user" extends="struts-default" namespace="/user">
+        <!--        name代表某个action中得方法  在地址栏访问时都得前边都得加user_                                                                                           -->
+        <action name="user_*" class="userAction" method="{1}">
+            <!--        name里是逻辑名（action中return的返回）   标签中间为跳转的地址                                                                     -->
+            <result name="login">/login.jsp</result>
+            <!--            action跳action                                                                             -->
+            <result name="queryAllAction" type="redirectAction">
+                <!--             挎包跳转                                                                           -->
+                <param name="namespace">/perpao</param>
+                <!--                跳转的action的名字                                           -->
+                <param name="actionName">perpao_queryAll</param>
+            </result>
+            <result name="regist">/regist.jsp</result>
+        </action>
+    </package>
+
+    <package name="perpao" extends="struts-default" namespace="/perpao">
+        <action name="perpao_*" class="perpaoAction" method="{1}">
+            <result name="queryAll" type="dispatcher">/emplist.jsp</result>
+            <result name="queryAllAction" type="redirectAction">perpao_queryAll</result>
+            <result name="queryOne">/updateEmp.jsp</result>
+        </action>
+    </package>
+
+</struts>

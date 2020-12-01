@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!--    创建数据源-->
+    <bean class="com.alibaba.druid.pool.DruidDataSource" id="dataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
+        <property name="url" value="jdbc:mysql://192.168.30.129:8066/tt"></property>
+        <property name="username" value="root"></property>
+        <property name="password" value="123"></property>
+    </bean>
+    <!--创建sqlSession-->
+    <bean class="org.mybatis.spring.SqlSessionFactoryBean" id="sqlSessionFactory">
+        <!--注入数据-->
+        <property name="dataSource" ref="dataSource"></property>
+        <property name="mapperLocations" value="classpath:com/baizhi/mapper/*.xml"></property>
+    </bean>
+
+    <!--创建dao-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+        <property name="basePackage" value="com.baizhi.dao"></property>
+    </bean>
+
+    <!--创建事务管理器-->
+    <bean class="org.springframework.jdbc.datasource.DataSourceTransactionManager" id="transactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!--  创建事物环绕通知  -->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="*save"/>
+            <tx:method name="*findAll" propagation="SUPPORTS"/>
+            <tx:method name="*update"/>
+            <tx:method name="*delete"/>
+            <tx:method name="*queryOne"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!--  配置事物切面 -->
+    <aop:config>
+        <aop:pointcut id="pc" expression="within(com.baizhi.service..*ServiceImpl)"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="pc"/>
+    </aop:config>
+
+    <!--    管理service-->
+    <bean class="com.baizhi.service.UserServiceImpl" id="userService">
+        <property name="userDAO" ref="userDAO"/>
+    </bean>
+    <bean class="com.baizhi.service.PerpaoServiceImpl" id="perpaoService">
+        <property name="perpaoDAO" ref="perpaoDAO"/>
+    </bean>
+    <!--    管理action-->
+    <bean class="com.baizhi.action.UserAction" id="userAction" scope="prototype">
+        <property name="userService" ref="userService"/>
+    </bean>
+
+    <bean class="com.baizhi.action.PerpaoAction" id="perpaoAction">
+        <property name="perpaoService" ref="perpaoService"/>
+    </bean>
+</beans>
